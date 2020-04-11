@@ -23,6 +23,7 @@ from allianceauth.srp.managers import SRPManager
 from .models import SrpPaymentToken
 logger = logging.getLogger(__name__)
 
+from . import providers
 
 @login_required
 @permission_required('srp.access_srp')
@@ -41,7 +42,7 @@ def srp_fleet_view(request, fleet_id):
 
 @login_required
 @permission_required('auth.srp_management')
-@token_required('esi-ui.open_window.v1')
+@token_required(['esi-ui.open_window.v1', 'esi-location.read_online.v1'])
 def srp_set_payment_character(request, token, fleet_id=None):
     if token:
         srp_link = False
@@ -69,8 +70,9 @@ def srp_open_info(request, id=None):
         if id:
             linked = request.user.srp_character
             if linked:
-                c = linked.token.get_esi_client()
-                c.User_Interface.post_ui_openwindow_information(target_id=id).result()
+                online = providers.provider.client.Location.get_characters_character_id_online(character_id=linked.token.character_id, _request_options=providers.get_operation_auth_headers(linked.token)).result()
+                if online.get('online', False):
+                    providers.provider.client.User_Interface.post_ui_openwindow_information(target_id=id, _request_options=providers.get_operation_auth_headers(linked.token)).result()
 
         return HttpResponse("Success!")
     except:
