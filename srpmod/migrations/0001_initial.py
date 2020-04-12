@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0011_update_proxy_permissions'),
-        ('esi', '0006_remove_url_length_limit'),
+        ('esi', '0005_remove_token_length_limit'),
     ]
 
     operations = [
