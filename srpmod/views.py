@@ -91,3 +91,6 @@ def srp_management(request, all=False):
     totalcost = fleets.aggregate(total_cost=Sum('srpuserrequest__srp_total_amount')).get('total_cost', 0)
     context = {"srpfleets": fleets, "totalcost": totalcost}
     return render(request, 'srpmod/management.html', context=context)
+
+
+
