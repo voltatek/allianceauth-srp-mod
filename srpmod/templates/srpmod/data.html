@@ -174,8 +174,10 @@
                                     <i class="glyphicon glyphicon-question-sign" rel="tooltip" title="{% blocktrans trimmed %}Click value to edit
     Enter to save & next
     ESC to cancel{% endblocktrans %}"id="blah"></i></th>
+                                {% if perms.auth.srp_management %}
                                 <th class="text-center">{% trans "Payment Link" %}
                                     <i class="glyphicon glyphicon-question-sign" rel="tooltip" title="{% blocktrans trimmed %}Click to Copy Amount and Open Character Info in Game{% endblocktrans %}"id="blah"></i></th>
+                                {% endif %}
                                 <th class="text-center">{% trans "Post Time" %}</th>
                                 <th class="text-center">{% trans "Status" %}</th>
                                 {% if perms.auth.srp_management %}
@@ -193,7 +195,9 @@
                                     <td class="text-center">{{ srpfleetrequest.srp_ship_name }}</td>
                                     <td class="text-center">{{ srpfleetrequest.kb_total_loss | intcomma }} ISK</td>
                                     <td {% if perms.auth.srp_management %}class="srp" data-name="srp_total_amount" data-type="number" data-pk="{{srpfleetrequest.id}}" data-url="{% url 'srp:request_update_amount' srpfleetrequest.id %}" data-params="{csrfmiddlewaretoken:'{{csrf_token}}'}"{% endif %} class="text-center">{{ srpfleetrequest.srp_total_amount | intcomma }} ISK</td>
+                                    {% if perms.auth.srp_management %}
                                     <td class="text-center"><a class="copy-tag label label-success" data-clipboard-text="{{ srpfleetrequest.srp_total_amount }}" id="{{ srpfleetrequest.character.character_id }}">Pay: {{ srpfleetrequest.character.character_name }} </a><div class="lds-spinner hide"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div></td>
+                                    {% endif %}
                                     <td class="text-center">{{ srpfleetrequest.post_time | date:"Y-m-d H:i" }}</td>
                                     <td class="text-center">
                                         {% if srpfleetrequest.srp_status == "Approved" %}
