@@ -21,6 +21,13 @@ from allianceauth.srp.models import SrpFleetMain
 from allianceauth.srp.models import SrpUserRequest
 from allianceauth.srp.managers import SRPManager
 from .models import SrpPaymentToken
+
+from django.db.models import Count, Sum, F
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
+from allianceauth.srp.models import SrpUserRequest
+import copy
+
 logger = logging.getLogger(__name__)
 
 from . import providers
@@ -84,12 +91,37 @@ def srp_open_info(request, id=None):
 def srp_management(request, all=False):
     logger.debug("srp_management called by user %s" % request.user)
     fleets = SrpFleetMain.objects.select_related('fleet_commander').prefetch_related('srpuserrequest_set').all()
+
+    now = timezone.now()
+    dt = now - relativedelta(months=12)
+    output_array={}
+    fleet_breakout = SrpUserRequest.objects.select_related('srp_fleet_main')\
+                            .values('srp_fleet_main')\
+                            .annotate(total_cost=Sum('srp_total_amount'))\
+                            .annotate(fc_name=F('srp_fleet_main__fleet_commander__character_name'))\
+                            .annotate(fleet_date=F('srp_fleet_main__fleet_time'))\
+                            .order_by('-fleet_date')
+
+    tempdate = fleet_breakout.last().get('fleet_date')
+    tempdate = tempdate.replace(day = 1)
+    output_areay_scafold = {}
+    while tempdate < timezone.now():
+        date_str = tempdate.strftime("%Y-%m")
+        output_areay_scafold[date_str] = 0
+        tempdate = tempdate + relativedelta(months=1)
+
+    for fleet in fleet_breakout:
+        if fleet.get('fc_name') not in output_array:
+            output_array[fleet.get('fc_name')] = copy.deepcopy(output_areay_scafold)
+        date_str = fleet.get('fleet_date').strftime("%Y-%m")
+        output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
+
     if not all:
         fleets = fleets.filter(fleet_srp_status="")
     else:
         logger.debug("Returning all SRP requests")
     totalcost = fleets.aggregate(total_cost=Sum('srpuserrequest__srp_total_amount')).get('total_cost', 0)
-    context = {"srpfleets": fleets, "totalcost": totalcost}
+    context = {"srpfleets": fleets, "totalcost": totalcost, 'graph':output_array,'graph_label':output_areay_scafold}
     return render(request, 'srpmod/management.html', context=context)
 
 
