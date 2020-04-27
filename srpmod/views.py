@@ -110,18 +110,21 @@ def srp_management(request, all=False):
         output_areay_scafold[date_str] = 0
         tempdate = tempdate + relativedelta(months=1)
 
+    global_srp = copy.deepcopy(output_areay_scafold)
+
     for fleet in fleet_breakout:
         if fleet.get('fc_name') not in output_array:
             output_array[fleet.get('fc_name')] = copy.deepcopy(output_areay_scafold)
         date_str = fleet.get('fleet_date').strftime("%Y-%m")
         output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
+        global_srp[date_str] += fleet.get('total_cost')
 
     if not all:
         fleets = fleets.filter(fleet_srp_status="")
     else:
         logger.debug("Returning all SRP requests")
     totalcost = fleets.aggregate(total_cost=Sum('srpuserrequest__srp_total_amount')).get('total_cost', 0)
-    context = {"srpfleets": fleets, "totalcost": totalcost, 'graph':output_array,'graph_label':output_areay_scafold}
+    context = {"srpfleets": fleets, "totalcost": totalcost, 'graph':output_array,'graph_label':output_areay_scafold,'all_srp':global_srp}
     return render(request, 'srpmod/management.html', context=context)
 
 

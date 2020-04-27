@@ -169,8 +169,16 @@
                     fill: false,
                 },
                 {% endfor %}
+                {
+                    label: "All SRP",
+                    borderColor: "#FF0000",
+                    data: [{% for fleet_month, isk in all_srp.items %}{{isk}},{% endfor %}],
+                    fill: false,
+                },
+
             ]
-        },
+        },  
+        
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -181,6 +189,13 @@
             tooltips: {
                 mode: 'index',
                 intersect: false,
+                filter: function (tooltipItem, data) {
+                    if (parseInt(tooltipItem.value)<1) {
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }                
             },
             hover: {
                 mode: 'nearest',
