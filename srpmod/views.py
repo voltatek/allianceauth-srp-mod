@@ -103,7 +103,7 @@ def srp_management(request, all=False):
                             .order_by('-fleet_date')
 
     tempdate = fleet_breakout.last().get('fleet_date')
-    tempdate = tempdate.replace(day = 1)
+    tempdate = tempdate.replace(day = 1).replace(hour = 0).replace(minute = 0)
     output_areay_scafold = {}
     while tempdate < timezone.now():
         date_str = tempdate.strftime("%Y-%m")
@@ -115,9 +115,12 @@ def srp_management(request, all=False):
     for fleet in fleet_breakout:
         if fleet.get('fc_name') not in output_array:
             output_array[fleet.get('fc_name')] = copy.deepcopy(output_areay_scafold)
-        date_str = fleet.get('fleet_date').strftime("%Y-%m")
-        output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
-        global_srp[date_str] += fleet.get('total_cost')
+        try:
+            date_str = fleet.get('fleet_date').strftime("%Y-%m")
+            output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
+            global_srp[date_str] += fleet.get('total_cost')
+        except:
+            pass
 
     if not all:
         fleets = fleets.filter(fleet_srp_status="")
