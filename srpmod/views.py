@@ -101,27 +101,30 @@ def srp_management(request, all=False):
                             .annotate(fc_name=F('srp_fleet_main__fleet_commander__character_name'))\
                             .annotate(fleet_date=F('srp_fleet_main__fleet_time'))\
                             .order_by('-fleet_date')
-
-    tempdate = fleet_breakout.last().get('fleet_date')
-    tempdate = tempdate.replace(day = 1).replace(hour = 0).replace(minute = 0)
     output_areay_scafold = {}
-    while tempdate < timezone.now():
-        date_str = tempdate.strftime("%Y-%m")
-        output_areay_scafold[date_str] = 0
-        tempdate = tempdate + relativedelta(months=1)
+    global_srp = {}
 
-    global_srp = copy.deepcopy(output_areay_scafold)
+    try:
+        tempdate = fleet_breakout.last().get('fleet_date')
+        tempdate = tempdate.replace(day = 1).replace(hour = 0).replace(minute = 0)
+        while tempdate < timezone.now():
+            date_str = tempdate.strftime("%Y-%m")
+            output_areay_scafold[date_str] = 0
+            tempdate = tempdate + relativedelta(months=1)
 
-    for fleet in fleet_breakout:
-        if fleet.get('fc_name') not in output_array:
-            output_array[fleet.get('fc_name')] = copy.deepcopy(output_areay_scafold)
-        try:
-            date_str = fleet.get('fleet_date').strftime("%Y-%m")
-            output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
-            global_srp[date_str] += fleet.get('total_cost')
-        except:
-            pass
+        global_srp = copy.deepcopy(output_areay_scafold)
 
+        for fleet in fleet_breakout:
+            if fleet.get('fc_name') not in output_array:
+                output_array[fleet.get('fc_name')] = copy.deepcopy(output_areay_scafold)
+            try:
+                date_str = fleet.get('fleet_date').strftime("%Y-%m")
+                output_array[fleet.get('fc_name')][date_str] += fleet.get('total_cost')
+                global_srp[date_str] += fleet.get('total_cost')
+            except:
+                pass
+    except:
+        pass
     if not all:
         fleets = fleets.filter(fleet_srp_status="")
     else:
