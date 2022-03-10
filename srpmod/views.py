@@ -1,27 +1,17 @@
 import logging
-import uuid
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
-from django.contrib.humanize.templatetags.humanize import intcomma
-from django.http import JsonResponse, Http404, HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404, HttpResponse
+from django.shortcuts import render, redirect
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Sum
 from esi.decorators import token_required
-from allianceauth.authentication.decorators import permissions_required
-from allianceauth.eveonline.providers import provider
-from allianceauth.notifications import notify
-from allianceauth.srp.form import SrpFleetMainForm
-from allianceauth.srp.form import SrpFleetMainUpdateForm
-from allianceauth.srp.form import SrpFleetUserRequestForm
 from allianceauth.srp.models import SrpFleetMain
 from allianceauth.srp.models import SrpUserRequest
-from allianceauth.srp.managers import SRPManager
 from .models import SrpPaymentToken
 
-from django.db.models import Count, Sum, F
+from django.db.models import Sum, F
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from allianceauth.srp.models import SrpUserRequest
