@@ -85,16 +85,18 @@ def srp_management(request, all=False):
     dt = now - relativedelta(months=12)
     output_array={}
     fleet_breakout = SrpUserRequest.objects.select_related('srp_fleet_main')\
+                            .filter(srp_fleet_main__fleet_time__gte=dt)\
                             .values('srp_fleet_main')\
                             .annotate(total_cost=Sum('srp_total_amount'))\
                             .annotate(fc_name=F('srp_fleet_main__fleet_commander__character_name'))\
                             .annotate(fleet_date=F('srp_fleet_main__fleet_time'))\
                             .order_by('-fleet_date')
+
     output_areay_scafold = {}
     global_srp = {}
 
     try:
-        tempdate = fleet_breakout.last().get('fleet_date')
+        tempdate = fleet_breakout.filter().last().get('fleet_date')
         tempdate = tempdate.replace(day = 1).replace(hour = 0).replace(minute = 0)
         while tempdate < timezone.now():
             date_str = tempdate.strftime("%Y-%m")
